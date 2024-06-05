@@ -1,0 +1,65 @@
+<h1>Hello World! My Todo App</h1>
+
+<span id="mount"></span>
+<input type="text" id="task" />
+<button onclick="addTask()" >Add</button>
+
+
+
+<script type="text/javascript">
+
+var mount = null
+
+window.addEventListener("DOMContentLoaded", () => {
+    mount = document.getElementById("mount")
+    loadData()
+})
+
+function addTask() {
+    const task = document.getElementById("task")
+    post("/api/add", {task: task.value}, (data) => {
+        loadData()
+        task.value = ''
+    })
+}
+
+function removeTask(id) {
+    post("/api/remove", {id: id}, (data) => {
+        loadData()
+    })
+}
+
+function loadData() {
+    get("/api/all", (data) => {
+        let html = ""
+        data.forEach(x => {
+            html += `<button onclick="removeTask('${x.id}')">🗑️</button>${x.task} <br/>`
+        })
+        mount.innerHTML = html
+    })
+} 
+
+function get(url, f) {
+    fetch(url)
+    .then( response => response.json())
+    .then( data => f(data))
+    .catch((error) => {
+        console.log(`Error -> ${error}`)
+    })
+}
+
+function post(url, data, f) {
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then( response => response.json())
+    .then( f(data))
+    .catch((error) => {
+        console.log(`Error -> ${error}`)
+    })
+}
+</script>
